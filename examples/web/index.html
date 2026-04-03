@@ -11,10 +11,23 @@
       <header class="header">
         <h1>Excel 风格公式引擎 · 网页 Demo</h1>
         <p class="hint">
-          在格子中输入数字、文本，或以 <code>=</code> 开头输入公式（如
-          <code>=A1+B1</code>、<code>=SUM(A1:A3)</code>），点击「全部计算」后在格子下方显示该格的计算结果。
+          在格子或下方编辑栏输入数字、文本，或以 <code>=</code> 开头输入公式（如
+          <code>=A1+B1</code>、<code>=SUM(A1:A3)</code>）。输入公式时点击其他格子可将该格地址插入到光标处（与
+          Excel 类似）。点击「全部计算」后在格子下方显示该格的计算结果。
         </p>
       </header>
+      <div class="formula-bar-wrap" role="group" aria-label="编辑栏">
+        <div class="name-box" id="nameBox" aria-hidden="true">A1</div>
+        <input
+          type="text"
+          id="formulaBar"
+          class="formula-bar-input"
+          spellcheck="false"
+          autocomplete="off"
+          aria-label="公式栏"
+          placeholder="选中单元格后在此编辑，输入 = 后可点击格子插入引用"
+        />
+      </div>
       <div class="toolbar">
         <button type="button" id="btnRecalc" class="btn primary">全部计算</button>
         <button type="button" id="btnSample" class="btn">填入示例</button>

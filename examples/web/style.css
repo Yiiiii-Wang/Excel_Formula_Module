@@ -39,12 +39,59 @@ body {
   font-size: 0.9em;
 }
 
+.formula-bar-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 16px 0 12px;
+  border: 1px solid #c5c9d4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.name-box {
+  flex: 0 0 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-right: 1px solid #c5c9d4;
+  user-select: none;
+}
+
+.formula-bar-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  background: #fff;
+}
+
+.formula-bar-input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #2563eb;
+}
+
+.formula-bar-input::placeholder {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin: 20px 0 16px;
+  margin: 12px 0 16px;
 }
 
 .btn {
@@ -115,6 +162,12 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 52px;
+}
+
+.cell-inner.is-active {
+  outline: 2px solid #217346;
+  outline-offset: -2px;
+  background: rgb(33 115 70 / 6%);
 }
 
 .sheet td input {

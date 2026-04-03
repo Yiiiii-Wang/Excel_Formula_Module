@@ -13,6 +13,79 @@ import { topologicalFormulaOrder } from "./topo-order.ts";
 const COLS = 6;
 const ROWS = 8;
 
+const formulaBarEl = document.getElementById("formulaBar");
+const nameBoxEl = document.getElementById("nameBox");
+
+/** 当前选中的单元格（名称框 / 公式栏所对应的格子） */
+let activeCellKey = "A1";
+
+function isFormulaEditing(el: unknown): el is HTMLInputElement {
+  return el instanceof HTMLInputElement && el.value.trimStart().startsWith("=");
+}
+
+/** 正在编辑公式的输入框：公式栏或格子内输入（须以 = 开头） */
+function getFormulaEditor(): HTMLInputElement | null {
+  const ae = document.activeElement;
+  if (!(ae instanceof HTMLInputElement)) {
+    return null;
+  }
+  if (ae.id === "formulaBar" && isFormulaEditing(ae)) {
+    return ae;
+  }
+  if (ae.dataset.cell !== undefined && isFormulaEditing(ae)) {
+    return ae;
+  }
+  return null;
+}
+
+function updateActiveHighlight(): void {
+  for (const el of document.querySelectorAll(".cell-inner.is-active")) {
+    el.classList.remove("is-active");
+  }
+  const input = document.querySelector<HTMLInputElement>(
+    `[data-cell="${activeCellKey}"]`,
+  );
+  const inner = input?.closest(".cell-inner");
+  inner?.classList.add("is-active");
+}
+
+function syncBarFromCell(key: string): void {
+  const input = document.querySelector<HTMLInputElement>(
+    `[data-cell="${key}"]`,
+  );
+  if (formulaBarEl instanceof HTMLInputElement && input !== null) {
+    formulaBarEl.value = input.value;
+  }
+  if (nameBoxEl !== null) {
+    nameBoxEl.textContent = key;
+  }
+}
+
+function syncCellFromBar(): void {
+  const input = document.querySelector<HTMLInputElement>(
+    `[data-cell="${activeCellKey}"]`,
+  );
+  if (input !== null && formulaBarEl instanceof HTMLInputElement) {
+    input.value = formulaBarEl.value;
+  }
+}
+
+function setActiveCell(key: string): void {
+  activeCellKey = key.toUpperCase();
+  syncBarFromCell(activeCellKey);
+  updateActiveHighlight();
+}
+
+function cellInputFromEventTarget(
+  target: EventTarget | null,
+): HTMLInputElement | null {
+  if (!(target instanceof Element)) {
+    return null;
+  }
+  const input = target.closest("td")?.querySelector("input[data-cell]");
+  return input instanceof HTMLInputElement ? input : null;
+}
+
 function address(col: number, row: number): string {
   return `${String.fromCharCode(65 + col)}${row + 1}`;
 }
@@ -242,9 +315,74 @@ function fillSample(): void {
       input.value = v;
     }
   }
+  syncBarFromCell(activeCellKey);
+}
+
+function wireFormulaBar(): void {
+  const sheet = document.getElementById("sheet");
+  if (sheet === null || !(formulaBarEl instanceof HTMLInputElement)) {
+    return;
+  }
+
+  sheet.addEventListener("focusin", (e) => {
+    const t = e.target;
+    if (t instanceof HTMLInputElement && t.dataset.cell) {
+      setActiveCell(t.dataset.cell);
+    }
+  });
+
+  formulaBarEl.addEventListener("input", () => {
+    syncCellFromBar();
+  });
+
+  sheet.addEventListener("input", (e) => {
+    const t = e.target;
+    if (
+      t instanceof HTMLInputElement &&
+      t.dataset.cell?.toUpperCase() === activeCellKey
+    ) {
+      syncBarFromCell(activeCellKey);
+    }
+  });
+
+  sheet.addEventListener(
+    "mousedown",
+    (e) => {
+      const editor = getFormulaEditor();
+      if (editor === null) {
+        return;
+      }
+
+      const hit = cellInputFromEventTarget(e.target);
+      if (hit === null || !hit.dataset.cell) {
+        return;
+      }
+
+      const refAddr = hit.dataset.cell.toUpperCase();
+      e.preventDefault();
+      e.stopPropagation();
+
+      const start = editor.selectionStart ?? editor.value.length;
+      const end = editor.selectionEnd ?? start;
+      const v = editor.value;
+      editor.value = `${v.slice(0, start)}${refAddr}${v.slice(end)}`;
+      const pos = start + refAddr.length;
+      editor.setSelectionRange(pos, pos);
+      editor.focus();
+
+      if (editor.id === "formulaBar") {
+        syncCellFromBar();
+      } else if (editor.dataset.cell) {
+        syncBarFromCell(editor.dataset.cell.toUpperCase());
+      }
+    },
+    true,
+  );
 }
 
 renderSheet();
+wireFormulaBar();
+setActiveCell("A1");
 
 document.getElementById("btnRecalc")?.addEventListener("click", () => {
   const inputs = collectInputs();
