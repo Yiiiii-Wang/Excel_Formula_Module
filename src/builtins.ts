@@ -1,13 +1,15 @@
 import {
-  cellError,
-  isCellError,
   type CellError,
+  cellError,
   type FormulaValue,
+  isCellError,
 } from "./value.js";
 
 export type FormulaFunction = (args: readonly FormulaValue[]) => FormulaValue;
 
-function firstError(args: readonly FormulaValue[]): ReturnType<typeof cellError> | undefined {
+function firstError(
+  args: readonly FormulaValue[],
+): ReturnType<typeof cellError> | undefined {
   for (const v of args) {
     if (isCellError(v)) {
       return v;
@@ -313,7 +315,12 @@ export function builtinMid(args: readonly FormulaValue[]): FormulaValue {
   if (isCellError(start) || isCellError(len)) {
     return isCellError(start) ? start : len;
   }
-  if (!Number.isInteger(start) || !Number.isInteger(len) || start < 1 || len < 0) {
+  if (
+    !Number.isInteger(start) ||
+    !Number.isInteger(len) ||
+    start < 1 ||
+    len < 0
+  ) {
     return cellError("VALUE");
   }
   const text = s === null ? "" : String(s);

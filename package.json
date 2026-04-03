@@ -16,6 +16,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "demo": "npm run build && node examples/demo.mjs",
@@ -23,6 +25,7 @@
     "demo:web:build": "vite build --config vite.demo.config.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
     "@types/node": "^25.5.0",
     "typescript": "^6.0.2",
     "vite": "^7.1.12",

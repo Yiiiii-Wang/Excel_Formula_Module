@@ -127,9 +127,7 @@ export function countExprNodes(expr: Expr): number {
     case "UnaryOp":
       return 1 + countExprNodes(expr.argument);
     case "Call":
-      return (
-        1 + expr.args.reduce((n, arg) => n + countExprNodes(arg), 0)
-      );
+      return 1 + expr.args.reduce((n, arg) => n + countExprNodes(arg), 0);
     case "CellRef":
     case "RangeRef":
       return 1;

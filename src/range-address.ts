@@ -45,7 +45,10 @@ export function formatA1(col: number, row: number): string {
 }
 
 /** 行优先展开矩形区域内的所有单元格地址 */
-export function expandRangeAddresses(topLeft: string, bottomRight: string): string[] {
+export function expandRangeAddresses(
+  topLeft: string,
+  bottomRight: string,
+): string[] {
   const a = parseA1Address(topLeft);
   const b = parseA1Address(bottomRight);
   const c1 = Math.min(a.col, b.col);

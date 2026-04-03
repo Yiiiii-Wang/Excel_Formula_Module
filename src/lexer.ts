@@ -37,11 +37,7 @@ function isDigit(ch: string): boolean {
 }
 
 function isAlpha(ch: string): boolean {
-  return (
-    (ch >= "a" && ch <= "z") ||
-    (ch >= "A" && ch <= "Z") ||
-    ch === "_"
-  );
+  return (ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z") || ch === "_";
 }
 
 function isAlphaNumeric(ch: string): boolean {
@@ -169,13 +165,13 @@ export function tokenizeFormula(input: string): Token[] {
       continue;
     }
 
-    if (ch === "\"") {
+    if (ch === '"') {
       const start = i;
       i += 1;
-      while (i < source.length && source[i] !== "\"") {
+      while (i < source.length && source[i] !== '"') {
         i += 1;
       }
-      if (source[i] !== "\"") {
+      if (source[i] !== '"') {
         throw new LexError("Unterminated string literal");
       }
       i += 1;

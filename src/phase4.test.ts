@@ -7,7 +7,7 @@ import { cellError } from "./value.js";
 
 describe("parser: precedence and range", () => {
   it("parses & lower than + - (Excel order)", () => {
-    const expr = parseFormula("=1+2&\"3\"");
+    const expr = parseFormula('=1+2&"3"');
     expect(expr).toEqual({
       kind: "BinaryOp",
       op: "&",
@@ -47,7 +47,7 @@ describe("parser: precedence and range", () => {
 
 describe("evaluator: operators", () => {
   it("evaluates concat after addition", () => {
-    expect(evaluateFormula("=1+2&\"3\"")).toBe("33");
+    expect(evaluateFormula('=1+2&"3"')).toBe("33");
   });
 
   it("evaluates right-associative exponent", () => {
@@ -55,8 +55,8 @@ describe("evaluator: operators", () => {
   });
 
   it("compares string equality", () => {
-    expect(evaluateFormula("=\"a\"=\"a\"")).toBe(true);
-    expect(evaluateFormula("=\"a\"=\"b\"")).toBe(false);
+    expect(evaluateFormula('="a"="a"')).toBe(true);
+    expect(evaluateFormula('="a"="b"')).toBe(false);
   });
 });
 
@@ -79,10 +79,10 @@ describe("built-in functions", () => {
   });
 
   it("LEN / LEFT / MID / CONCAT", () => {
-    expect(evaluateFormula("=LEN(\"ab\")")).toBe(2);
-    expect(evaluateFormula("=LEFT(\"abc\",2)")).toBe("ab");
-    expect(evaluateFormula("=MID(\"abcdef\",2,3)")).toBe("bcd");
-    expect(evaluateFormula("=CONCAT(\"a\",\"b\",2)")).toBe("ab2");
+    expect(evaluateFormula('=LEN("ab")')).toBe(2);
+    expect(evaluateFormula('=LEFT("abc",2)')).toBe("ab");
+    expect(evaluateFormula('=MID("abcdef",2,3)')).toBe("bcd");
+    expect(evaluateFormula('=CONCAT("a","b",2)')).toBe("ab2");
   });
 });
 
@@ -93,7 +93,9 @@ describe("EvaluateContext (memory mock)", () => {
       A2: 2,
       A3: 3,
     });
-    expect(evaluateFormula("=SUM(A1:A3)", createDefaultRegistry(), ctx)).toBe(6);
+    expect(evaluateFormula("=SUM(A1:A3)", createDefaultRegistry(), ctx)).toBe(
+      6,
+    );
   });
 
   it("returns REF without context for bare cell", () => {

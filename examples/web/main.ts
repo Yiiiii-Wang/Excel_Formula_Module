@@ -1,7 +1,11 @@
 import { evaluate } from "../../src/api.ts";
 import type { EvaluateContext } from "../../src/context-memory.ts";
 import { expandRangeAddresses } from "../../src/range-address.ts";
-import { formatErrorDisplay, isCellError, type FormulaValue } from "../../src/value.ts";
+import {
+  type FormulaValue,
+  formatErrorDisplay,
+  isCellError,
+} from "../../src/value.ts";
 
 const COLS = 6;
 const ROWS = 8;
@@ -32,7 +36,7 @@ function createSheetContext(
 ): EvaluateContext {
   const getCell = (addr: string): FormulaValue => {
     const key = addr.trim().toUpperCase();
-    if (Object.prototype.hasOwnProperty.call(computed, key)) {
+    if (Object.hasOwn(computed, key)) {
       const v = computed[key];
       if (v !== undefined) {
         return v;
@@ -178,8 +182,7 @@ function applyResults(
       const raw = inputs[key] ?? "";
       if (isFormula(raw)) {
         const v = computed[key];
-        const text =
-          v !== undefined ? formatValue(v) : "（未算出）";
+        const text = v !== undefined ? formatValue(v) : "（未算出）";
         el.textContent = text || " ";
         el.classList.toggle("empty", text === "");
         el.classList.toggle("err", v !== undefined && isCellError(v));

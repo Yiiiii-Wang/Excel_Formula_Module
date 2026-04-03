@@ -18,11 +18,11 @@ describe("tokenizeFormula", () => {
   });
 
   it("tokenizes string and comparison operators", () => {
-    const tokens = tokenizeFormula("\"ok\"<>\"bad\" <= 10");
+    const tokens = tokenizeFormula('"ok"<>"bad" <= 10');
     expect(tokens.map((t) => [t.kind, t.lexeme])).toEqual([
-      ["STRING", "\"ok\""],
+      ["STRING", '"ok"'],
       ["NE", "<>"],
-      ["STRING", "\"bad\""],
+      ["STRING", '"bad"'],
       ["LE", "<="],
       ["NUMBER", "10"],
       ["EOF", ""],
@@ -30,13 +30,13 @@ describe("tokenizeFormula", () => {
   });
 
   it("tokenizes & and :", () => {
-    const tokens = tokenizeFormula("A1:B2&\"x\"");
+    const tokens = tokenizeFormula('A1:B2&"x"');
     expect(tokens.map((t) => [t.kind, t.lexeme])).toEqual([
       ["IDENT", "A1"],
       ["COLON", ":"],
       ["IDENT", "B2"],
       ["AMP", "&"],
-      ["STRING", "\"x\""],
+      ["STRING", '"x"'],
       ["EOF", ""],
     ]);
   });

@@ -1,6 +1,6 @@
 import type { Expr } from "./ast.js";
-import { expandRangeAddresses } from "./range-address.js";
 import { parseFormula } from "./parser.js";
+import { expandRangeAddresses } from "./range-address.js";
 
 function walkExpr(expr: Expr, out: Set<string>): void {
   switch (expr.kind) {
@@ -33,10 +33,6 @@ function walkExpr(expr: Expr, out: Set<string>): void {
         // 非法区域则跳过
       }
       return;
-    }
-    default: {
-      const _exhaustive: never = expr;
-      return _exhaustive;
     }
   }
 }

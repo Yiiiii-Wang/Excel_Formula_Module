@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   cellError,
+  type FormulaValue,
   formatErrorDisplay,
   isCellError,
-  type FormulaValue,
 } from "./value.js";
 
 describe("cellError / isCellError / formatErrorDisplay", () => {

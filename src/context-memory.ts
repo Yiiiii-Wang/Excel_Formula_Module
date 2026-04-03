@@ -4,7 +4,11 @@ import type { FormulaValue } from "./value.js";
 /** 求值时解析单元格与区域：由宿主（表格引擎）实现；测试可用内存 Map */
 export interface EvaluateContext {
   getCell(address: string, sheet?: string): FormulaValue;
-  getRange(topLeft: string, bottomRight: string, sheet?: string): FormulaValue[];
+  getRange(
+    topLeft: string,
+    bottomRight: string,
+    sheet?: string,
+  ): FormulaValue[];
 }
 
 /** `cells` 的 key 使用大写 A1，如 `A1`、`B2` */

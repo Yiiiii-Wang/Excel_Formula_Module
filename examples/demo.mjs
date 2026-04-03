@@ -45,8 +45,10 @@ printResult("语法错误（ok: false）", "=1++");
 const depFormula = "=SUM(A1:A2)+B1";
 console.log("\n依赖分析");
 console.log(`  公式: ${depFormula}`);
-console.log(`  单元格: ${JSON.stringify([...extractDependencies(depFormula)])}`);
+console.log(
+  `  单元格: ${JSON.stringify([...extractDependencies(depFormula)])}`,
+);
 
-console.log("\n" + "═".repeat(56));
+console.log(`\n${"═".repeat(56)}`);
 console.log(" Demo 结束 ");
-console.log("═".repeat(56) + "\n");
+console.log(`${"═".repeat(56)}\n`);

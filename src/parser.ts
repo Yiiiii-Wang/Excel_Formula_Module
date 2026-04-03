@@ -1,5 +1,10 @@
-import { ast, type BinaryOperator, type Expr, type UnaryOperator } from "./ast.js";
-import { tokenizeFormula, type Token, type TokenKind } from "./lexer.js";
+import {
+  ast,
+  type BinaryOperator,
+  type Expr,
+  type UnaryOperator,
+} from "./ast.js";
+import { type Token, type TokenKind, tokenizeFormula } from "./lexer.js";
 
 export class ParseError extends Error {
   constructor(message: string) {

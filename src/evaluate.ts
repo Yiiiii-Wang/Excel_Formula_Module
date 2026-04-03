@@ -7,11 +7,13 @@ import type {
 } from "./ast.js";
 import type { EvaluateContext } from "./context-memory.js";
 import { parseFormula } from "./parser.js";
+import { createDefaultRegistry, type FunctionRegistry } from "./registry.js";
 import {
-  createDefaultRegistry,
-  type FunctionRegistry,
-} from "./registry.js";
-import { cellError, isCellError, type CellError, type FormulaValue } from "./value.js";
+  type CellError,
+  cellError,
+  type FormulaValue,
+  isCellError,
+} from "./value.js";
 
 export type { EvaluateContext } from "./context-memory.js";
 
@@ -50,7 +52,11 @@ function toNumber(value: FormulaValue): number | CellError {
   return cellError("VALUE");
 }
 
-function applyBinary(op: BinaryOperator, left: FormulaValue, right: FormulaValue): FormulaValue {
+function applyBinary(
+  op: BinaryOperator,
+  left: FormulaValue,
+  right: FormulaValue,
+): FormulaValue {
   if (isError(left)) {
     return left;
   }
@@ -92,7 +98,7 @@ function applyBinary(op: BinaryOperator, left: FormulaValue, right: FormulaValue
       }
       return ln / rn;
     case "^":
-      return Math.pow(ln, rn);
+      return ln ** rn;
     case "=":
       return ln === rn;
     case "<>":
@@ -123,21 +129,30 @@ function applyUnary(op: UnaryOperator, arg: FormulaValue): FormulaValue {
   return op === "+" ? n : -n;
 }
 
-function evaluateCellRef(expr: CellRefExpr, options: EvaluateOptions): FormulaValue {
+function evaluateCellRef(
+  expr: CellRefExpr,
+  options: EvaluateOptions,
+): FormulaValue {
   if (options.context === undefined) {
     return cellError("REF");
   }
   return options.context.getCell(expr.address, expr.sheet);
 }
 
-function evaluateRangeValues(expr: RangeRefExpr, options: EvaluateOptions): FormulaValue[] {
+function evaluateRangeValues(
+  expr: RangeRefExpr,
+  options: EvaluateOptions,
+): FormulaValue[] {
   if (options.context === undefined) {
     return [cellError("REF")];
   }
   return options.context.getRange(expr.topLeft, expr.bottomRight, expr.sheet);
 }
 
-function evaluateCallArgs(nodes: readonly Expr[], options: EvaluateOptions): FormulaValue[] {
+function evaluateCallArgs(
+  nodes: readonly Expr[],
+  options: EvaluateOptions,
+): FormulaValue[] {
   const out: FormulaValue[] = [];
   for (const node of nodes) {
     if (node.kind === "RangeRef") {
@@ -154,7 +169,10 @@ function evaluateCallArgs(nodes: readonly Expr[], options: EvaluateOptions): For
 /**
  * 对 AST 求值。无 `context` 时单元格 / 区域引用在标量上下文中为 `#REF!` 或 `#VALUE!`。
  */
-export function evaluateExpr(expr: Expr, options: EvaluateOptions): FormulaValue {
+export function evaluateExpr(
+  expr: Expr,
+  options: EvaluateOptions,
+): FormulaValue {
   const { functions } = options;
 
   switch (expr.kind) {
