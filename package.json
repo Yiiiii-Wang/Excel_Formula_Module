@@ -19,6 +19,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "demo": "npm run build && node examples/demo.mjs",
     "demo:web": "vite --config vite.demo.config.ts",
@@ -27,6 +28,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
     "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "typedoc": "^0.28.18",
     "typescript": "^6.0.2",
     "vite": "^7.1.12",
     "vitest": "^4.1.2"
