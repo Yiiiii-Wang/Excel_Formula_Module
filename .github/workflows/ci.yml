@@ -33,5 +33,8 @@ jobs:
       - name: Build library
         run: npm run build
 
+      - name: API docs (TypeDoc)
+        run: npm run docs
+
       - name: Build web demo
         run: npm run demo:web:build

@@ -90,15 +90,38 @@ npm run demo:web:build
 
 网页源码在 `examples/web/`，开发时直接 `import` 仓库内 `src/` 引擎代码（由 Vite 打包）。
 
+## 版本与变更
+
+- 版本号遵循 **语义化版本**（SemVer：`MAJOR.MINOR.PATCH`）。
+- 变更记录见根目录 **`CHANGELOG.md`**（发版时把 `[Unreleased]` 下沉到新版本）。
+
+## API 文档（TypeDoc）
+
+从入口 `src/index.ts` 生成静态 HTML（默认输出到 `docs/api/`，已加入 `.gitignore`，需本地生成）：
+
+```bash
+npm run docs
+```
+
+生成后在浏览器打开 `docs/api/index.html`。CI 中会执行 `npm run docs` 以确认文档能成功构建。
+
+## 持续集成（CI）
+
+推送或 PR 到 `main` / `master` 时，GitHub Actions 会依次执行：**Biome** → **typecheck** → **带覆盖率门槛的测试** → **库 build** → **TypeDoc** → **网页 demo build**。
+
 ## 脚本
 
 - `npm run demo` — 构建并运行 `examples/demo.mjs`
 - `npm run demo:web` — 启动网页 Demo（Vite dev）
 - `npm run demo:web:build` — 构建网页 Demo 到 `examples/web/dist/`
+- `npm run lint` — Biome 检查（格式 + lint）
+- `npm run format` — Biome 自动格式化
 - `npm run typecheck` — 全量类型检查（含测试与 Vitest 配置）
 - `npm run build` — 编译 `src`（不含 `*.test.ts`）到 `dist/`
 - `npm test` — 运行单元测试
+- `npm run test:coverage` — 测试 + 覆盖率门槛（`src/`，排除 `index.ts` 与 `*.test.ts`）
 - `npm run test:watch` — 监听模式跑测试
+- `npm run docs` — 生成 TypeDoc 到 `docs/api/`
 
 ## 开发
 
