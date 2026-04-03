@@ -5,6 +5,7 @@ import type {
   RangeRefExpr,
   UnaryOperator,
 } from "./ast.js";
+import { builtinIf, toLogical } from "./builtins.js";
 import type { EvaluateContext } from "./context-memory.js";
 import { parseFormula } from "./parser.js";
 import { createDefaultRegistry, type FunctionRegistry } from "./registry.js";
@@ -195,6 +196,19 @@ export function evaluateExpr(
       const fn = functions.get(expr.name);
       if (fn === undefined) {
         return cellError("NAME");
+      }
+      if (
+        expr.name.toUpperCase() === "IF" &&
+        expr.args.length === 3 &&
+        fn === builtinIf
+      ) {
+        const condVal = evaluateExpr(expr.args[0]!, options);
+        const lg = toLogical(condVal);
+        if (typeof lg !== "boolean") {
+          return lg;
+        }
+        const branch = lg ? expr.args[1]! : expr.args[2]!;
+        return evaluateExpr(branch, options);
       }
       const args = evaluateCallArgs(expr.args, options);
       return fn(args);
