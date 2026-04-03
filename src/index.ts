@@ -14,6 +14,16 @@ export { ast, countExprNodes } from "./ast.js";
 export type { Token, TokenKind } from "./lexer.js";
 export { LexError, tokenizeFormula } from "./lexer.js";
 export { ParseError, parseFormula } from "./parser.js";
+export type { EvaluateOptions } from "./evaluate.js";
+export { evaluateExpr, evaluateFormula } from "./evaluate.js";
+export type { FormulaFunction } from "./registry.js";
+export {
+  FunctionRegistry,
+  builtinMax,
+  builtinMin,
+  builtinSum,
+  createDefaultRegistry,
+} from "./registry.js";
 export type {
   CellError,
   ExcelErrorCode,
