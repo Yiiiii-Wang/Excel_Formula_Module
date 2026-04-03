@@ -41,6 +41,23 @@ describe("tokenizeFormula", () => {
     ]);
   });
 
+  it("tokenizes scientific notation and percent suffix", () => {
+    expect(tokenizeFormula("1e-2+3E+1").map((t) => [t.kind, t.lexeme])).toEqual(
+      [
+        ["NUMBER", "1e-2"],
+        ["PLUS", "+"],
+        ["NUMBER", "3E+1"],
+        ["EOF", ""],
+      ],
+    );
+    expect(tokenizeFormula("50%*2").map((t) => [t.kind, t.lexeme])).toEqual([
+      ["NUMBER", "50%"],
+      ["STAR", "*"],
+      ["NUMBER", "2"],
+      ["EOF", ""],
+    ]);
+  });
+
   it("tokenizes sheet-qualified references", () => {
     const tokens = tokenizeFormula("Sheet1!A1:B2+1");
     expect(tokens.map((t) => [t.kind, t.lexeme])).toEqual([

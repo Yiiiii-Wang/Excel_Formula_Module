@@ -152,17 +152,39 @@ export function tokenizeFormula(input: string): Token[] {
 
     if (isDigit(ch) || (ch === "." && isDigit(source[i + 1] ?? ""))) {
       const start = i;
-      if (ch !== ".") {
+      if (ch === ".") {
         i += 1;
         while (isDigit(source[i] ?? "")) {
           i += 1;
+        }
+      } else {
+        i += 1;
+        while (isDigit(source[i] ?? "")) {
+          i += 1;
+        }
+        if (source[i] === ".") {
+          i += 1;
+          while (isDigit(source[i] ?? "")) {
+            i += 1;
+          }
         }
       }
-      if (source[i] === ".") {
+      const expCh = source[i];
+      if (expCh === "e" || expCh === "E") {
         i += 1;
+        if (source[i] === "+" || source[i] === "-") {
+          i += 1;
+        }
+        const expDigitsStart = i;
         while (isDigit(source[i] ?? "")) {
           i += 1;
         }
+        if (i === expDigitsStart) {
+          throw new LexError("Invalid exponent in number literal");
+        }
+      }
+      if (source[i] === "%") {
+        i += 1;
       }
       tokens.push({
         kind: "NUMBER",

@@ -73,6 +73,20 @@ class Parser {
   private readonly tokens: Token[];
   private cursor = 0;
 
+  static parseNumberToken(lexeme: string): Expr {
+    let raw = lexeme;
+    let percent = false;
+    if (raw.endsWith("%")) {
+      percent = true;
+      raw = raw.slice(0, -1);
+    }
+    const n = Number(raw);
+    if (!Number.isFinite(n)) {
+      throw new ParseError(`Invalid number literal: ${lexeme}`);
+    }
+    return ast.num(percent ? n / 100 : n);
+  }
+
   constructor(tokens: Token[]) {
     this.tokens = tokens;
   }
@@ -172,7 +186,7 @@ class Parser {
 
     if (token.kind === "NUMBER") {
       this.cursor += 1;
-      return ast.num(Number(token.lexeme));
+      return Parser.parseNumberToken(token.lexeme);
     }
 
     if (token.kind === "STRING") {

@@ -52,6 +52,8 @@ describe("evaluator: operators", () => {
 
   it("evaluates right-associative exponent", () => {
     expect(evaluateFormula("=2^3^2")).toBe(512);
+    expect(evaluateFormula("=1e2+1")).toBe(101);
+    expect(evaluateFormula("=50%*200")).toBe(100);
   });
 
   it("compares string equality", () => {
