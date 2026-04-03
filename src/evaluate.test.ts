@@ -41,6 +41,10 @@ describe("evaluateFormula (parse + eval)", () => {
     expect(evaluateFormula("=SUM(1,2,3)")).toBe(6);
   });
 
+  it("SUM skips non-numeric text like Excel", () => {
+    expect(evaluateFormula('=SUM(1,"x",2)')).toBe(3);
+  });
+
   it("evaluates =SUM(1, SUM(2,3))", () => {
     expect(evaluateFormula("=SUM(1, SUM(2,3))")).toBe(6);
   });

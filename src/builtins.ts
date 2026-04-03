@@ -198,18 +198,17 @@ export function builtinCounta(args: readonly FormulaValue[]): FormulaValue {
   return n;
 }
 
+/** 与 Excel 类似：跳过空与非数字文本；遇错误单元格则返回该错误 */
 export function builtinSum(args: readonly FormulaValue[]): FormulaValue {
-  const err = firstError(args);
-  if (err !== undefined) {
-    return err;
-  }
   let total = 0;
   for (const v of args) {
-    const n = toNumber(v);
-    if (isCellError(n)) {
-      return n;
+    const r = tryAggregateNumeric(v);
+    if (r.kind === "err") {
+      return r.error;
     }
-    total += n;
+    if (r.kind === "num") {
+      total += r.value;
+    }
   }
   return total;
 }
