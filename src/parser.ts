@@ -17,6 +17,8 @@ const COMPARISON_OP: Record<TokenKind, BinaryOperator | undefined> = {
   STAR: undefined,
   SLASH: undefined,
   CARET: undefined,
+  AMP: undefined,
+  COLON: undefined,
   LPAREN: undefined,
   RPAREN: undefined,
   COMMA: undefined,
@@ -59,7 +61,7 @@ class Parser {
   }
 
   private parseComparison(): Expr {
-    let expr = this.parseAdditive();
+    let expr = this.parseConcat();
     while (true) {
       const token = this.current();
       const op = COMPARISON_OP[token.kind];
@@ -67,8 +69,19 @@ class Parser {
         break;
       }
       this.cursor += 1;
-      const right = this.parseAdditive();
+      const right = this.parseConcat();
       expr = ast.binary(op, expr, right);
+    }
+    return expr;
+  }
+
+  /** 文本连接 &，优先级低于 + -，高于比较 */
+  private parseConcat(): Expr {
+    let expr = this.parseAdditive();
+    while (this.current().kind === "AMP") {
+      this.cursor += 1;
+      const right = this.parseAdditive();
+      expr = ast.binary("&", expr, right);
     }
     return expr;
   }
@@ -103,14 +116,15 @@ class Parser {
     return expr;
   }
 
+  /** 幂运算右结合：2^3^2 = 2^(3^2) */
   private parseExponent(): Expr {
-    let expr = this.parseUnary();
-    while (this.current().kind === "CARET") {
-      this.cursor += 1;
-      const right = this.parseUnary();
-      expr = ast.binary("^", expr, right);
+    const left = this.parseUnary();
+    if (this.current().kind !== "CARET") {
+      return left;
     }
-    return expr;
+    this.cursor += 1;
+    const right = this.parseExponent();
+    return ast.binary("^", left, right);
   }
 
   private parseUnary(): Expr {
@@ -139,6 +153,10 @@ class Parser {
     if (token.kind === "IDENT") {
       this.cursor += 1;
       const ident = token.lexeme.toUpperCase();
+      if (this.match("COLON")) {
+        const end = this.expect("IDENT", "Expected cell reference after ':'");
+        return ast.range(ident, end.lexeme.toUpperCase());
+      }
       if (this.match("LPAREN")) {
         const args: Expr[] = [];
         if (!this.match("RPAREN")) {
@@ -148,6 +166,12 @@ class Parser {
           this.expect("RPAREN", "Expected ')' after function arguments");
         }
         return ast.call(ident, args);
+      }
+      if (ident === "TRUE") {
+        return ast.bool(true);
+      }
+      if (ident === "FALSE") {
+        return ast.bool(false);
       }
       return ast.cell(ident);
     }

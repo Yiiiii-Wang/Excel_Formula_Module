@@ -1,12 +1,25 @@
+import type { FormulaFunction } from "./builtins.js";
 import {
-  cellError,
-  isCellError,
-  type CellError,
-  type FormulaValue,
-} from "./value.js";
+  builtinAbs,
+  builtinAnd,
+  builtinConcat,
+  builtinIf,
+  builtinInt,
+  builtinLeft,
+  builtinLen,
+  builtinMax,
+  builtinMid,
+  builtinMin,
+  builtinMod,
+  builtinNot,
+  builtinOr,
+  builtinRound,
+  builtinSqrt,
+  builtinSum,
+} from "./builtins.js";
 
-/** 内置函数签名：参数为已求值结果 */
-export type FormulaFunction = (args: readonly FormulaValue[]) => FormulaValue;
+export type { FormulaFunction } from "./builtins.js";
+export { builtinMax, builtinMin, builtinSum } from "./builtins.js";
 
 export class FunctionRegistry {
   private readonly map = new Map<string, FormulaFunction>();
@@ -24,103 +37,23 @@ export class FunctionRegistry {
   }
 }
 
-function firstError(args: readonly FormulaValue[]): CellError | undefined {
-  for (const v of args) {
-    if (isCellError(v)) {
-      return v;
-    }
-  }
-  return undefined;
-}
-
-function toNumber(value: FormulaValue): number | CellError {
-  if (isCellError(value)) {
-    return value;
-  }
-  if (typeof value === "number") {
-    if (Number.isFinite(value)) {
-      return value;
-    }
-    return cellError("NUM");
-  }
-  if (value === null) {
-    return 0;
-  }
-  if (typeof value === "boolean") {
-    return value ? 1 : 0;
-  }
-  if (typeof value === "string") {
-    const n = Number(value);
-    if (Number.isFinite(n)) {
-      return n;
-    }
-    return cellError("VALUE");
-  }
-  return cellError("VALUE");
-}
-
-/** 内置 SUM：忽略 null 当 0；非数字且无法转换则 VALUE；遇错误先传播 */
-export function builtinSum(args: readonly FormulaValue[]): FormulaValue {
-  const err = firstError(args);
-  if (err !== undefined) {
-    return err;
-  }
-  let total = 0;
-  for (const v of args) {
-    const n = toNumber(v);
-    if (isCellError(n)) {
-      return n;
-    }
-    total += n;
-  }
-  return total;
-}
-
-/** 内置 MIN */
-export function builtinMin(args: readonly FormulaValue[]): FormulaValue {
-  const err = firstError(args);
-  if (err !== undefined) {
-    return err;
-  }
-  if (args.length === 0) {
-    return cellError("VALUE");
-  }
-  const nums: number[] = [];
-  for (const v of args) {
-    const n = toNumber(v);
-    if (isCellError(n)) {
-      return n;
-    }
-    nums.push(n);
-  }
-  return Math.min(...nums);
-}
-
-/** 内置 MAX */
-export function builtinMax(args: readonly FormulaValue[]): FormulaValue {
-  const err = firstError(args);
-  if (err !== undefined) {
-    return err;
-  }
-  if (args.length === 0) {
-    return cellError("VALUE");
-  }
-  const nums: number[] = [];
-  for (const v of args) {
-    const n = toNumber(v);
-    if (isCellError(n)) {
-      return n;
-    }
-    nums.push(n);
-  }
-  return Math.max(...nums);
-}
-
-/** 注册 SUM、MIN、MAX */
 export function createDefaultRegistry(): FunctionRegistry {
   const r = new FunctionRegistry();
   r.register("SUM", builtinSum);
   r.register("MIN", builtinMin);
   r.register("MAX", builtinMax);
+  r.register("ABS", builtinAbs);
+  r.register("INT", builtinInt);
+  r.register("ROUND", builtinRound);
+  r.register("MOD", builtinMod);
+  r.register("SQRT", builtinSqrt);
+  r.register("IF", builtinIf);
+  r.register("AND", builtinAnd);
+  r.register("OR", builtinOr);
+  r.register("NOT", builtinNot);
+  r.register("LEN", builtinLen);
+  r.register("LEFT", builtinLeft);
+  r.register("MID", builtinMid);
+  r.register("CONCAT", builtinConcat);
   return r;
 }

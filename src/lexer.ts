@@ -16,6 +16,8 @@ export type TokenKind =
   | "GT"
   | "LE"
   | "GE"
+  | "AMP"
+  | "COLON"
   | "EOF";
 
 export interface Token {
@@ -84,6 +86,16 @@ export function tokenizeFormula(input: string): Token[] {
     }
     if (ch === "^") {
       tokens.push({ kind: "CARET", lexeme: ch });
+      i += 1;
+      continue;
+    }
+    if (ch === "&") {
+      tokens.push({ kind: "AMP", lexeme: ch });
+      i += 1;
+      continue;
+    }
+    if (ch === ":") {
+      tokens.push({ kind: "COLON", lexeme: ch });
       i += 1;
       continue;
     }

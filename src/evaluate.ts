@@ -1,4 +1,11 @@
-import type { BinaryOperator, Expr, UnaryOperator } from "./ast.js";
+import type {
+  BinaryOperator,
+  CellRefExpr,
+  Expr,
+  RangeRefExpr,
+  UnaryOperator,
+} from "./ast.js";
+import type { EvaluateContext } from "./context-memory.js";
 import { parseFormula } from "./parser.js";
 import {
   createDefaultRegistry,
@@ -6,8 +13,11 @@ import {
 } from "./registry.js";
 import { cellError, isCellError, type CellError, type FormulaValue } from "./value.js";
 
+export type { EvaluateContext } from "./context-memory.js";
+
 export interface EvaluateOptions {
   readonly functions: FunctionRegistry;
+  readonly context?: EvaluateContext;
 }
 
 function isError(v: FormulaValue): v is CellError {
@@ -52,6 +62,12 @@ function applyBinary(op: BinaryOperator, left: FormulaValue, right: FormulaValue
     const l = left === null ? "" : String(left);
     const r = right === null ? "" : String(right);
     return l + r;
+  }
+
+  if (op === "=" || op === "<>") {
+    if (typeof left === "string" && typeof right === "string") {
+      return op === "=" ? left === right : left !== right;
+    }
   }
 
   const ln = toNumber(left);
@@ -107,8 +123,36 @@ function applyUnary(op: UnaryOperator, arg: FormulaValue): FormulaValue {
   return op === "+" ? n : -n;
 }
 
+function evaluateCellRef(expr: CellRefExpr, options: EvaluateOptions): FormulaValue {
+  if (options.context === undefined) {
+    return cellError("REF");
+  }
+  return options.context.getCell(expr.address, expr.sheet);
+}
+
+function evaluateRangeValues(expr: RangeRefExpr, options: EvaluateOptions): FormulaValue[] {
+  if (options.context === undefined) {
+    return [cellError("REF")];
+  }
+  return options.context.getRange(expr.topLeft, expr.bottomRight, expr.sheet);
+}
+
+function evaluateCallArgs(nodes: readonly Expr[], options: EvaluateOptions): FormulaValue[] {
+  const out: FormulaValue[] = [];
+  for (const node of nodes) {
+    if (node.kind === "RangeRef") {
+      out.push(...evaluateRangeValues(node, options));
+    } else if (node.kind === "CellRef") {
+      out.push(evaluateCellRef(node, options));
+    } else {
+      out.push(evaluateExpr(node, options));
+    }
+  }
+  return out;
+}
+
 /**
- * 对 AST 求值。未提供单元格上下文时，`CellRef` / `RangeRef` 返回 `#REF!`。
+ * 对 AST 求值。无 `context` 时单元格 / 区域引用在标量上下文中为 `#REF!` 或 `#VALUE!`。
  */
 export function evaluateExpr(expr: Expr, options: EvaluateOptions): FormulaValue {
   const { functions } = options;
@@ -117,6 +161,8 @@ export function evaluateExpr(expr: Expr, options: EvaluateOptions): FormulaValue
     case "NumberLiteral":
       return expr.value;
     case "StringLiteral":
+      return expr.value;
+    case "BooleanLiteral":
       return expr.value;
     case "UnaryOp": {
       const v = evaluateExpr(expr.argument, options);
@@ -132,12 +178,13 @@ export function evaluateExpr(expr: Expr, options: EvaluateOptions): FormulaValue
       if (fn === undefined) {
         return cellError("NAME");
       }
-      const args = expr.args.map((a) => evaluateExpr(a, options));
+      const args = evaluateCallArgs(expr.args, options);
       return fn(args);
     }
     case "CellRef":
+      return evaluateCellRef(expr, options);
     case "RangeRef":
-      return cellError("REF");
+      return cellError("VALUE");
     default: {
       const _never: never = expr;
       return _never;
@@ -145,11 +192,14 @@ export function evaluateExpr(expr: Expr, options: EvaluateOptions): FormulaValue
   }
 }
 
-/** 解析公式字符串并用给定（或默认）函数表求值 */
+/** 解析公式字符串并求值；`context` 用于解析单元格 / 区域引用 */
 export function evaluateFormula(
   input: string,
   functions: FunctionRegistry = createDefaultRegistry(),
+  context?: EvaluateContext,
 ): FormulaValue {
   const expr = parseFormula(input);
-  return evaluateExpr(expr, { functions });
+  const options: EvaluateOptions =
+    context === undefined ? { functions } : { functions, context };
+  return evaluateExpr(expr, options);
 }

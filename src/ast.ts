@@ -24,6 +24,7 @@ export type UnaryOperator = "+" | "-";
 export type Expr =
   | NumberLiteralExpr
   | StringLiteralExpr
+  | BooleanLiteralExpr
   | BinaryOpExpr
   | UnaryOpExpr
   | CallExpr
@@ -38,6 +39,11 @@ export interface NumberLiteralExpr {
 export interface StringLiteralExpr {
   readonly kind: "StringLiteral";
   readonly value: string;
+}
+
+export interface BooleanLiteralExpr {
+  readonly kind: "BooleanLiteral";
+  readonly value: boolean;
 }
 
 export interface BinaryOpExpr {
@@ -85,6 +91,9 @@ export const ast = {
   str(value: string): StringLiteralExpr {
     return { kind: "StringLiteral", value };
   },
+  bool(value: boolean): BooleanLiteralExpr {
+    return { kind: "BooleanLiteral", value };
+  },
   binary(op: BinaryOperator, left: Expr, right: Expr): BinaryOpExpr {
     return { kind: "BinaryOp", op, left, right };
   },
@@ -111,6 +120,7 @@ export function countExprNodes(expr: Expr): number {
   switch (expr.kind) {
     case "NumberLiteral":
     case "StringLiteral":
+    case "BooleanLiteral":
       return 1;
     case "BinaryOp":
       return 1 + countExprNodes(expr.left) + countExprNodes(expr.right);

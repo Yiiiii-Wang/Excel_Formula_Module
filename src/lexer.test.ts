@@ -29,6 +29,18 @@ describe("tokenizeFormula", () => {
     ]);
   });
 
+  it("tokenizes & and :", () => {
+    const tokens = tokenizeFormula("A1:B2&\"x\"");
+    expect(tokens.map((t) => [t.kind, t.lexeme])).toEqual([
+      ["IDENT", "A1"],
+      ["COLON", ":"],
+      ["IDENT", "B2"],
+      ["AMP", "&"],
+      ["STRING", "\"x\""],
+      ["EOF", ""],
+    ]);
+  });
+
   it("throws on unexpected characters", () => {
     expect(() => tokenizeFormula("1@2")).toThrow(LexError);
   });
