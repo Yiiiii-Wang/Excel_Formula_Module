@@ -8,6 +8,7 @@ import {
   formatErrorDisplay,
   isCellError,
 } from "../../src/value.ts";
+import { topologicalFormulaOrder } from "./topo-order.ts";
 
 const COLS = 6;
 const ROWS = 8;
@@ -106,23 +107,32 @@ function recalc(inputs: Record<string, string>): Record<string, FormulaValue> {
     computed[key] = cellError("CIRC", "循环引用");
   }
 
-  const passes = 40;
-  for (let p = 0; p < passes; p++) {
-    for (const key of formulaKeys) {
-      if (circular.has(key)) {
-        continue;
-      }
-      const raw = inputs[key] ?? "";
-      const ctx = createSheetContext(inputs, computed);
-      const res = evaluate(raw, ctx);
-      if (res.ok) {
-        computed[key] = res.value;
-      } else {
-        computed[key] = {
-          kind: "error",
-          code: "VALUE",
-          message: res.error.message,
-        };
+  const order = topologicalFormulaOrder(formulaKeys, inputs, circular);
+  const active = formulaKeys.filter((k) => !circular.has(k));
+
+  const evalOne = (key: string): void => {
+    const raw = inputs[key] ?? "";
+    const ctx = createSheetContext(inputs, computed);
+    const res = evaluate(raw, ctx);
+    if (res.ok) {
+      computed[key] = res.value;
+    } else {
+      computed[key] = {
+        kind: "error",
+        code: "VALUE",
+        message: res.error.message,
+      };
+    }
+  };
+
+  if (order !== null) {
+    for (const key of order) {
+      evalOne(key);
+    }
+  } else {
+    for (let p = 0; p < 10; p++) {
+      for (const key of active) {
+        evalOne(key);
       }
     }
   }
@@ -246,7 +256,7 @@ document.getElementById("btnRecalc")?.addEventListener("click", () => {
   ).length;
   const circHint = nCirc > 0 ? `，含循环引用 ${nCirc} 格（#CIRC!）` : "";
   setStatus(
-    `已计算（公式格 ${nFormulas} 个；无环公式最多迭代 40 轮${circHint}）`,
+    `已计算（公式格 ${nFormulas} 个；无环公式按拓扑顺序单遍求值${circHint}）`,
   );
 });
 
