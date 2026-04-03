@@ -31,11 +31,21 @@ describe("evaluate() public API", () => {
     const r = evaluate("=A1+B1", ctx);
     expect(r).toEqual({ ok: true, value: 30 });
   });
+
+  it("ignores sheet qualifier for flat memory context", () => {
+    const ctx = createMemoryContext({ A1: 5 });
+    const r = evaluate("=SheetZ!A1+1", ctx);
+    expect(r).toEqual({ ok: true, value: 6 });
+  });
 });
 
 describe("extractDependencies", () => {
   it("collects cells and expands ranges", () => {
     expect(extractDependencies("=SUM(A1:A2)+B1")).toEqual(["A1", "A2", "B1"]);
+  });
+
+  it("includes sheet name in dependency keys for qualified refs", () => {
+    expect(extractDependencies("=S1!A1+B1")).toEqual(["B1", "S1!A1"]);
   });
 
   it("returns empty array for invalid formula", () => {

@@ -46,6 +46,27 @@ describe("parseFormula", () => {
     });
   });
 
+  it("parses sheet-qualified cell and range", () => {
+    expect(parseFormula("=Sheet1!A1+1")).toEqual({
+      kind: "BinaryOp",
+      op: "+",
+      left: { kind: "CellRef", sheet: "SHEET1", address: "A1" },
+      right: { kind: "NumberLiteral", value: 1 },
+    });
+    expect(parseFormula("=SUM(Sheet1!A1:B2)")).toEqual({
+      kind: "Call",
+      name: "SUM",
+      args: [
+        {
+          kind: "RangeRef",
+          sheet: "SHEET1",
+          topLeft: "A1",
+          bottomRight: "B2",
+        },
+      ],
+    });
+  });
+
   it("rejects formula longer than maxLength", () => {
     const body = "1".repeat(20);
     expect(() => parseFormula(`=${body}`, { maxLength: 10 })).toThrow(

@@ -20,14 +20,24 @@ function walkExpr(expr: Expr, out: Set<string>): void {
         walkExpr(arg, out);
       }
       return;
-    case "CellRef":
-      out.add(expr.address.trim().toUpperCase());
+    case "CellRef": {
+      const addr = expr.address.trim().toUpperCase();
+      if (expr.sheet !== undefined) {
+        out.add(`${expr.sheet.trim().toUpperCase()}!${addr}`);
+      } else {
+        out.add(addr);
+      }
       return;
+    }
     case "RangeRef": {
       try {
-        const cells = expandRangeAddresses(expr.topLeft, expr.bottomRight);
+        const cells = expandRangeAddresses(
+          expr.topLeft.trim().toUpperCase(),
+          expr.bottomRight.trim().toUpperCase(),
+        );
+        const sh = expr.sheet?.trim().toUpperCase();
         for (const c of cells) {
-          out.add(c);
+          out.add(sh !== undefined ? `${sh}!${c}` : c);
         }
       } catch {
         // 非法区域则跳过

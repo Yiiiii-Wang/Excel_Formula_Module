@@ -41,6 +41,20 @@ describe("tokenizeFormula", () => {
     ]);
   });
 
+  it("tokenizes sheet-qualified references", () => {
+    const tokens = tokenizeFormula("Sheet1!A1:B2+1");
+    expect(tokens.map((t) => [t.kind, t.lexeme])).toEqual([
+      ["IDENT", "Sheet1"],
+      ["BANG", "!"],
+      ["IDENT", "A1"],
+      ["COLON", ":"],
+      ["IDENT", "B2"],
+      ["PLUS", "+"],
+      ["NUMBER", "1"],
+      ["EOF", ""],
+    ]);
+  });
+
   it("throws on unexpected characters", () => {
     expect(() => tokenizeFormula("1@2")).toThrow(LexError);
   });

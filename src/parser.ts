@@ -29,6 +29,7 @@ const COMPARISON_OP: Record<TokenKind, BinaryOperator | undefined> = {
   CARET: undefined,
   AMP: undefined,
   COLON: undefined,
+  BANG: undefined,
   LPAREN: undefined,
   RPAREN: undefined,
   COMMA: undefined,
@@ -182,6 +183,18 @@ class Parser {
     if (token.kind === "IDENT") {
       this.cursor += 1;
       const ident = token.lexeme.toUpperCase();
+      if (this.match("BANG")) {
+        const cellTok = this.expect("IDENT", "Expected cell address after '!'");
+        const cellAddr = cellTok.lexeme.toUpperCase();
+        if (this.match("COLON")) {
+          const end = this.expect(
+            "IDENT",
+            "Expected cell reference after ':' in range",
+          );
+          return ast.range(cellAddr, end.lexeme.toUpperCase(), ident);
+        }
+        return ast.cell(cellAddr, ident);
+      }
       if (this.match("COLON")) {
         const end = this.expect("IDENT", "Expected cell reference after ':'");
         return ast.range(ident, end.lexeme.toUpperCase());
