@@ -2,7 +2,10 @@ import type { FormulaFunction } from "./builtins.js";
 import {
   builtinAbs,
   builtinAnd,
+  builtinAverage,
   builtinConcat,
+  builtinCount,
+  builtinCounta,
   builtinIf,
   builtinInt,
   builtinLeft,
@@ -40,6 +43,9 @@ export class FunctionRegistry {
 export function createDefaultRegistry(): FunctionRegistry {
   const r = new FunctionRegistry();
   r.register("SUM", builtinSum);
+  r.register("AVERAGE", builtinAverage);
+  r.register("COUNT", builtinCount);
+  r.register("COUNTA", builtinCounta);
   r.register("MIN", builtinMin);
   r.register("MAX", builtinMax);
   r.register("ABS", builtinAbs);

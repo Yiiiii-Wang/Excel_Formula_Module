@@ -90,6 +90,99 @@ export function toLogical(value: FormulaValue): boolean | CellError {
   return false;
 }
 
+type AggregateNumberResult =
+  | { readonly kind: "num"; readonly value: number }
+  | { readonly kind: "skip" }
+  | { readonly kind: "err"; readonly error: ReturnType<typeof cellError> };
+
+function tryNumberForAverage(value: FormulaValue): AggregateNumberResult {
+  if (isCellError(value)) {
+    return { kind: "err", error: value };
+  }
+  if (value === null) {
+    return { kind: "skip" };
+  }
+  if (typeof value === "number") {
+    if (Number.isFinite(value)) {
+      return { kind: "num", value };
+    }
+    return { kind: "err", error: cellError("NUM") };
+  }
+  if (typeof value === "boolean") {
+    return { kind: "num", value: value ? 1 : 0 };
+  }
+  if (typeof value === "string") {
+    const t = value.trim();
+    if (t === "") {
+      return { kind: "skip" };
+    }
+    const n = Number(t);
+    if (Number.isFinite(n)) {
+      return { kind: "num", value: n };
+    }
+    return { kind: "skip" };
+  }
+  return { kind: "skip" };
+}
+
+/** 与 Excel 类似：忽略空与非数字文本；遇错误单元格则返回该错误；无数字项时为 #DIV/0! */
+export function builtinAverage(args: readonly FormulaValue[]): FormulaValue {
+  const err = firstError(args);
+  if (err !== undefined) {
+    return err;
+  }
+  let sum = 0;
+  let count = 0;
+  for (const v of args) {
+    const r = tryNumberForAverage(v);
+    if (r.kind === "err") {
+      return r.error;
+    }
+    if (r.kind === "num") {
+      sum += r.value;
+      count++;
+    }
+  }
+  if (count === 0) {
+    return cellError("DIV/0");
+  }
+  return sum / count;
+}
+
+/** 仅统计有限数值（与 Excel COUNT 对区域展开的行为一致） */
+export function builtinCount(args: readonly FormulaValue[]): FormulaValue {
+  const err = firstError(args);
+  if (err !== undefined) {
+    return err;
+  }
+  let n = 0;
+  for (const v of args) {
+    if (typeof v === "number" && Number.isFinite(v)) {
+      n++;
+    }
+  }
+  return n;
+}
+
+/** 统计非空项（null、"" 不计；错误需先由 firstError 抛出） */
+export function builtinCounta(args: readonly FormulaValue[]): FormulaValue {
+  const err = firstError(args);
+  if (err !== undefined) {
+    return err;
+  }
+  let n = 0;
+  for (const v of args) {
+    if (v === null) {
+      continue;
+    }
+    if (typeof v === "string" && v === "") {
+      continue;
+    }
+    n++;
+  }
+  return n;
+}
+
 export function builtinSum(args: readonly FormulaValue[]): FormulaValue {
   const err = firstError(args);
   if (err !== undefined) {

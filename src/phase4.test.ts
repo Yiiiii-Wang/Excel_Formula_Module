@@ -84,6 +84,15 @@ describe("built-in functions", () => {
     expect(evaluateFormula('=MID("abcdef",2,3)')).toBe("bcd");
     expect(evaluateFormula('=CONCAT("a","b",2)')).toBe("ab2");
   });
+
+  it("evaluates AVERAGE, COUNT, COUNTA", () => {
+    expect(evaluateFormula("=AVERAGE(2,4)")).toBe(3);
+    expect(evaluateFormula('=AVERAGE(1,"2","x")')).toBe(1.5);
+    expect(evaluateFormula('=AVERAGE("x")')).toEqual(cellError("DIV/0"));
+    expect(evaluateFormula('=COUNT(1,2,"x")')).toBe(2);
+    expect(evaluateFormula('=COUNTA(1,"a",TRUE)')).toBe(3);
+    expect(evaluateFormula('=COUNTA(1,"")')).toBe(1);
+  });
 });
 
 describe("EvaluateContext (memory mock)", () => {
