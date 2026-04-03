@@ -97,6 +97,16 @@ describe("built-in functions", () => {
     expect(evaluateFormula('=COUNTA(1,"a",TRUE)')).toBe(3);
     expect(evaluateFormula('=COUNTA(1,"")')).toBe(1);
   });
+
+  it("evaluates NOW and RAND", () => {
+    const t = evaluateFormula("=NOW()");
+    expect(typeof t).toBe("number");
+    expect(t as number).toBeGreaterThan(1e12);
+    const u = evaluateFormula("=RAND()");
+    expect(typeof u).toBe("number");
+    expect(u as number).toBeGreaterThanOrEqual(0);
+    expect(u as number).toBeLessThan(1);
+  });
 });
 
 describe("EvaluateContext (memory mock)", () => {

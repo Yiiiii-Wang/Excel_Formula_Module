@@ -95,7 +95,8 @@ type AggregateNumberResult =
   | { readonly kind: "skip" }
   | { readonly kind: "err"; readonly error: ReturnType<typeof cellError> };
 
-function tryNumberForAverage(value: FormulaValue): AggregateNumberResult {
+/** 与 Excel 聚合函数类似：空与非数字文本跳过；布尔按 0/1；错误与 NUM 传播 */
+function tryAggregateNumeric(value: FormulaValue): AggregateNumberResult {
   if (isCellError(value)) {
     return { kind: "err", error: value };
   }
@@ -134,7 +135,7 @@ export function builtinAverage(args: readonly FormulaValue[]): FormulaValue {
   let sum = 0;
   let count = 0;
   for (const v of args) {
-    const r = tryNumberForAverage(v);
+    const r = tryAggregateNumeric(v);
     if (r.kind === "err") {
       return r.error;
     }
@@ -147,6 +148,20 @@ export function builtinAverage(args: readonly FormulaValue[]): FormulaValue {
     return cellError("DIV/0");
   }
   return sum / count;
+}
+
+export function builtinNow(args: readonly FormulaValue[]): FormulaValue {
+  if (args.length !== 0) {
+    return cellError("VALUE");
+  }
+  return Date.now();
+}
+
+export function builtinRand(args: readonly FormulaValue[]): FormulaValue {
+  if (args.length !== 0) {
+    return cellError("VALUE");
+  }
+  return Math.random();
 }
 
 /** 仅统计有限数值（与 Excel COUNT 对区域展开的行为一致） */

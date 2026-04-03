@@ -15,7 +15,9 @@ import {
   builtinMin,
   builtinMod,
   builtinNot,
+  builtinNow,
   builtinOr,
+  builtinRand,
   builtinRound,
   builtinSqrt,
   builtinSum,
@@ -61,5 +63,7 @@ export function createDefaultRegistry(): FunctionRegistry {
   r.register("LEFT", builtinLeft);
   r.register("MID", builtinMid);
   r.register("CONCAT", builtinConcat);
+  r.register("NOW", builtinNow);
+  r.register("RAND", builtinRand);
   return r;
 }
