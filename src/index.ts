@@ -24,8 +24,14 @@ export { createMemoryContext } from "./context-memory.js";
 export { extractDependencies } from "./dependencies.js";
 export type { EvaluateOptions } from "./evaluate.js";
 export { evaluateExpr, evaluateFormula } from "./evaluate.js";
+export {
+  computeMaxAstDepth,
+  DEFAULT_MAX_AST_DEPTH,
+  DEFAULT_MAX_FORMULA_LENGTH,
+} from "./formula-limits.js";
 export type { Token, TokenKind } from "./lexer.js";
 export { LexError, tokenizeFormula } from "./lexer.js";
+export type { ParseFormulaOptions } from "./parser.js";
 export { ParseError, parseFormula } from "./parser.js";
 export type { FormulaFunction } from "./registry.js";
 export {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseFormula } from "./parser.js";
+import { ParseError, parseFormula } from "./parser.js";
 
 describe("parseFormula", () => {
   it("parses arithmetic precedence and parentheses", () => {
@@ -44,5 +44,22 @@ describe("parseFormula", () => {
       left: { kind: "CellRef", address: "A1" },
       right: { kind: "NumberLiteral", value: 2 },
     });
+  });
+
+  it("rejects formula longer than maxLength", () => {
+    const body = "1".repeat(20);
+    expect(() => parseFormula(`=${body}`, { maxLength: 10 })).toThrow(
+      ParseError,
+    );
+  });
+
+  it("rejects AST deeper than maxAstDepth", () => {
+    let inner = "1";
+    for (let i = 0; i < 30; i++) {
+      inner = `(${inner}+1)`;
+    }
+    expect(() => parseFormula(`=${inner}`, { maxAstDepth: 12 })).toThrow(
+      ParseError,
+    );
   });
 });

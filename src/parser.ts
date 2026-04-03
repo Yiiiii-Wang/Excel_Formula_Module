@@ -4,6 +4,11 @@ import {
   type Expr,
   type UnaryOperator,
 } from "./ast.js";
+import {
+  computeMaxAstDepth,
+  DEFAULT_MAX_AST_DEPTH,
+  DEFAULT_MAX_FORMULA_LENGTH,
+} from "./formula-limits.js";
 import { type Token, type TokenKind, tokenizeFormula } from "./lexer.js";
 
 export class ParseError extends Error {
@@ -36,11 +41,30 @@ const COMPARISON_OP: Record<TokenKind, BinaryOperator | undefined> = {
   EOF: undefined,
 };
 
-export function parseFormula(input: string): Expr {
+export interface ParseFormulaOptions {
+  readonly maxLength?: number;
+  readonly maxAstDepth?: number;
+}
+
+export function parseFormula(
+  input: string,
+  options?: ParseFormulaOptions,
+): Expr {
+  const maxLen = options?.maxLength ?? DEFAULT_MAX_FORMULA_LENGTH;
+  if (input.length > maxLen) {
+    throw new ParseError(
+      `Formula exceeds maximum length (${maxLen} characters)`,
+    );
+  }
   const tokens = tokenizeFormula(input);
   const parser = new Parser(tokens);
   const expr = parser.parseExpression();
   parser.expect("EOF", "Expected end of input");
+  const maxDepth = options?.maxAstDepth ?? DEFAULT_MAX_AST_DEPTH;
+  const depth = computeMaxAstDepth(expr);
+  if (depth > maxDepth) {
+    throw new ParseError(`Formula exceeds maximum nesting depth (${maxDepth})`);
+  }
   return expr;
 }
 
