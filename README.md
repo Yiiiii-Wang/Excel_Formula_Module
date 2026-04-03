@@ -1,14 +1,68 @@
 # Excel-style formula engine
 
-TypeScript 实现的类 Excel 公式解析与求值模块（进行中）。
+TypeScript 实现的类 Excel 公式解析与求值模块。
 
 ## 需求边界（阶段 0 约定）
 
 | 项目 | 约定 |
 |------|------|
-| 单元格引用 | 支持 `A1`、区域 `A1:B2`；跨表引用（如 `Sheet1!A1`）可在后续迭代加入。 |
-| 公式前缀 | 与 Excel 一致：公式以 `=` 开头；解析前会去掉前导 `=`。 |
-| 错误类型 | 与 Excel 对齐，使用 `#DIV/0!`、`#VALUE!` 等错误字符串或等价结构化表示。 |
+| 单元格引用 | 支持 `A1`、区域 `A1:B2`；跨表引用（如 `Sheet1!A1`）尚未实现。 |
+| 公式前缀 | 与 Excel 一致：公式以 `=` 开头；词法阶段会去掉前导 `=`。 |
+| 错误类型 | 结构化 `CellError`（`code`），可用 `formatErrorDisplay` 转为 `#DIV/0!` 等。 |
+
+## 对外 API（阶段 5）
+
+### `evaluate(formula, context?, options?)`
+
+一步完成：去 `=`（在 tokenizer 内）、解析、求值。
+
+- **`formula`**：以 `=` 开头的公式字符串。
+- **`context`**（可选）：`EvaluateContext`，提供 `getCell` / `getRange`；可用 **`createMemoryContext(cells)`** 传入内存表。
+- **`options?.functions`**（可选）：自定义 `FunctionRegistry`，默认内置函数表。
+
+返回 **`EvaluateResult`**：
+
+- **`{ ok: true, value }`**：求值成功；`value` 为 `FormulaValue`（含数字、文本、布尔、`null` 或 **Excel 风格错误** `CellError`）。
+- **`{ ok: false, error: { kind, message } }`**：仅表示 **词法/解析失败**；`#DIV/0!` 等仍为 `ok: true` 下的 `value`。
+
+```ts
+import { evaluate, createMemoryContext } from "excel_formula_module";
+
+const r = evaluate("=SUM(A1:A2)", createMemoryContext({ A1: 1, A2: 2 }));
+if (r.ok) {
+  console.log(r.value);
+}
+```
+
+### `extractDependencies(formula)`
+
+供表格引擎做依赖分析：解析公式（失败则返回 **空数组**），收集 **所有引用的单元格**（**区域会展开**为矩形内全部 A1 地址），去重后 **按字典序排序** 返回。
+
+```ts
+extractDependencies("=A1+B1:C2"); // 例如 ["A1","B1","B2","C1","C2"]
+```
+
+### 底层接口
+
+- **`evaluateFormula` / `evaluateExpr`**：已解析 AST 或字符串 + 可选 `FunctionRegistry` / `EvaluateContext`。
+- **`parseFormula` / `tokenizeFormula`**：仅解析。
+
+## 已支持函数（内置）
+
+| 类别 | 函数 |
+|------|------|
+| 聚合 / 数学 | `SUM`, `MIN`, `MAX`, `ABS`, `INT`, `ROUND`, `MOD`, `SQRT` |
+| 逻辑 | `IF`, `AND`, `OR`, `NOT` |
+| 文本 | `LEN`, `LEFT`, `MID`, `CONCAT` |
+
+字面量 **`TRUE` / `FALSE`** 按 Excel 关键字解析为布尔，不作为单元格地址。
+
+## 与 Excel 的差异（已知）
+
+- **跨表引用**（`Sheet1!A1`）、**三维引用**、**结构化引用**等未实现。
+- **数组公式 / 动态溢出**未实现；单独使用区域引用作标量时多为 `#VALUE!`。
+- **日期/时间**、**格式**、**区域交集 / 联合运算符**（空格、`,`）未实现。
+- **部分函数语义**（如 `ROUND` 银行家舍入、`MOD` 负数边界）与 Excel 可能存在细微差别；以本仓库单测为准。
 
 ## 脚本
 
