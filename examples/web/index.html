@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>公式引擎 Demo</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <h1>Excel 风格公式引擎 · 网页 Demo</h1>
+        <p class="hint">
+          在格子中输入数字、文本，或以 <code>=</code> 开头输入公式（如
+          <code>=A1+B1</code>、<code>=SUM(A1:A3)</code>），点击「全部计算」后在格子下方显示该格的计算结果。
+        </p>
+      </header>
+      <div class="toolbar">
+        <button type="button" id="btnRecalc" class="btn primary">全部计算</button>
+        <button type="button" id="btnSample" class="btn">填入示例</button>
+        <span id="status" class="status" aria-live="polite"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="sheet" id="sheet" aria-label="演示表格"></table>
+      </div>
+      <footer class="footer">
+        <code>npm run demo:web</code> 启动 · 源码见 <code>examples/web/</code>
+      </footer>
+    </div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

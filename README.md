@@ -74,9 +74,27 @@ npm run demo
 
 等价于 `npm run build && node examples/demo.mjs`。也可在已有 `dist/` 时直接执行 `node examples/demo.mjs`。
 
+## Demo（网页 UI）
+
+简易表格界面（A1–F8）：输入常数或 `=` 公式，点「全部计算」在格子下方显示结果；「填入示例」可一键加载示例数据。
+
+```bash
+npm run demo:web
+```
+
+浏览器访问终端提示的本地地址（默认 `http://localhost:5173`）。静态构建输出在 `examples/web/dist/`：
+
+```bash
+npm run demo:web:build
+```
+
+网页源码在 `examples/web/`，开发时直接 `import` 仓库内 `src/` 引擎代码（由 Vite 打包）。
+
 ## 脚本
 
 - `npm run demo` — 构建并运行 `examples/demo.mjs`
+- `npm run demo:web` — 启动网页 Demo（Vite dev）
+- `npm run demo:web:build` — 构建网页 Demo 到 `examples/web/dist/`
 - `npm run typecheck` — 全量类型检查（含测试与 Vitest 配置）
 - `npm run build` — 编译 `src`（不含 `*.test.ts`）到 `dist/`
 - `npm test` — 运行单元测试
