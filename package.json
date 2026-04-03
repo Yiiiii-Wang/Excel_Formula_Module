@@ -17,7 +17,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "demo": "npm run build && node examples/demo.mjs"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

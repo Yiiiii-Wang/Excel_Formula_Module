@@ -64,8 +64,19 @@ extractDependencies("=A1+B1:C2"); // 例如 ["A1","B1","B2","C1","C2"]
 - **日期/时间**、**格式**、**区域交集 / 联合运算符**（空格、`,`）未实现。
 - **部分函数语义**（如 `ROUND` 银行家舍入、`MOD` 负数边界）与 Excel 可能存在细微差别；以本仓库单测为准。
 
+## Demo（命令行）
+
+先编译再运行示例脚本（展示 `evaluate`、内存上下文、`extractDependencies`）：
+
+```bash
+npm run demo
+```
+
+等价于 `npm run build && node examples/demo.mjs`。也可在已有 `dist/` 时直接执行 `node examples/demo.mjs`。
+
 ## 脚本
 
+- `npm run demo` — 构建并运行 `examples/demo.mjs`
 - `npm run typecheck` — 全量类型检查（含测试与 Vitest 配置）
 - `npm run build` — 编译 `src`（不含 `*.test.ts`）到 `dist/`
 - `npm test` — 运行单元测试
