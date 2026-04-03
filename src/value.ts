@@ -11,7 +11,9 @@ export type ExcelErrorCode =
   | "NAME"
   | "NUM"
   | "NA"
-  | "NULL";
+  | "NULL"
+  /** 循环引用（表格引擎常用；Excel 多在状态栏提示，此处用独立错误码便于 UI 展示） */
+  | "CIRC";
 
 /** 结构化错误，求值器可返回此类型以表示 #DIV/0! 等 */
 export interface CellError {
@@ -53,6 +55,7 @@ const DISPLAY_BY_CODE: Record<ExcelErrorCode, string> = {
   NUM: "#NUM!",
   NA: "#N/A",
   NULL: "#NULL!",
+  CIRC: "#CIRC!",
 };
 
 export function formatErrorDisplay(err: CellError): string {

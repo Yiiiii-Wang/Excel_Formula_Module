@@ -18,6 +18,7 @@ export type {
   UnaryOperator,
 } from "./ast.js";
 export { ast, countExprNodes } from "./ast.js";
+export { findFormulaCellsWithCircularReference } from "./circular-deps.js";
 export type { EvaluateContext } from "./context-memory.js";
 export { createMemoryContext } from "./context-memory.js";
 export { extractDependencies } from "./dependencies.js";

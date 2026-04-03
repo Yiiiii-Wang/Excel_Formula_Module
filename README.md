@@ -8,7 +8,7 @@ TypeScript 实现的类 Excel 公式解析与求值模块。
 |------|------|
 | 单元格引用 | 支持 `A1`、区域 `A1:B2`；跨表引用（如 `Sheet1!A1`）尚未实现。 |
 | 公式前缀 | 与 Excel 一致：公式以 `=` 开头；词法阶段会去掉前导 `=`。 |
-| 错误类型 | 结构化 `CellError`（`code`），可用 `formatErrorDisplay` 转为 `#DIV/0!` 等。 |
+| 错误类型 | 结构化 `CellError`（`code`），可用 `formatErrorDisplay` 转为 `#DIV/0!`、`#CIRC!`（循环引用）等。 |
 
 ## 对外 API（阶段 5）
 
@@ -33,6 +33,10 @@ if (r.ok) {
   console.log(r.value);
 }
 ```
+
+### `findFormulaCellsWithCircularReference(formulaKeys, inputs)`
+
+在已知「哪些格是公式」及每个格的公式文本时，返回应视为 **循环引用** 的公式格地址集合（大写 A1）：含 Tarjan 找环 + 向依赖方传播。网页 Demo 重算前用其标记 `#CIRC!`。
 
 ### `extractDependencies(formula)`
 

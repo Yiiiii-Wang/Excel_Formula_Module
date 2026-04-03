@@ -1,7 +1,9 @@
 import { evaluate } from "../../src/api.ts";
+import { findFormulaCellsWithCircularReference } from "../../src/circular-deps.ts";
 import type { EvaluateContext } from "../../src/context-memory.ts";
 import { expandRangeAddresses } from "../../src/range-address.ts";
 import {
+  cellError,
   type FormulaValue,
   formatErrorDisplay,
   isCellError,
@@ -98,9 +100,18 @@ function recalc(inputs: Record<string, string>): Record<string, FormulaValue> {
       }
     }
   }
+  const formulaKeySet = new Set(formulaKeys);
+  const circular = findFormulaCellsWithCircularReference(formulaKeySet, inputs);
+  for (const key of circular) {
+    computed[key] = cellError("CIRC", "循环引用");
+  }
+
   const passes = 40;
   for (let p = 0; p < passes; p++) {
     for (const key of formulaKeys) {
+      if (circular.has(key)) {
+        continue;
+      }
       const raw = inputs[key] ?? "";
       const ctx = createSheetContext(inputs, computed);
       const res = evaluate(raw, ctx);
@@ -230,7 +241,13 @@ document.getElementById("btnRecalc")?.addEventListener("click", () => {
   const computed = recalc(inputs);
   applyResults(inputs, computed);
   const nFormulas = Object.keys(computed).length;
-  setStatus(`已计算（公式格 ${nFormulas} 个，最多迭代 40 轮）`);
+  const nCirc = [...Object.values(computed)].filter(
+    (v) => isCellError(v) && v.code === "CIRC",
+  ).length;
+  const circHint = nCirc > 0 ? `，含循环引用 ${nCirc} 格（#CIRC!）` : "";
+  setStatus(
+    `已计算（公式格 ${nFormulas} 个；无环公式最多迭代 40 轮${circHint}）`,
+  );
 });
 
 document.getElementById("btnSample")?.addEventListener("click", () => {
